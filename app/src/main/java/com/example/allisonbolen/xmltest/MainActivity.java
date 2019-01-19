@@ -3,12 +3,18 @@ package com.example.allisonbolen.xmltest;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
@@ -25,11 +31,21 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 12;
+    String LOGGEDIN = "YES, YOU GOT INTO GOOGLE FIT";
+    boolean loggedin = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        TextView labelView = findViewById(R.id.Label);
+
+        getPermissionsToGoogleFitAccount();
+        if(loggedin){
+            labelView.setText(LOGGEDIN);
+        }
+    }
+    public void getPermissionsToGoogleFitAccount(){
         // Create a FitnessOptions instance, declaring the Fit API data types and access required by your app
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
@@ -44,16 +60,12 @@ public class MainActivity extends AppCompatActivity {
                     GoogleSignIn.getLastSignedInAccount(this),
                     fitnessOptions);
         } else {
+            loggedin = true;
             accessGoogleFit();
         }
 
-        Toast toast = Toast.makeText(getApplicationContext(),
-                "This is a message displayed in a Toast",
-                Toast.LENGTH_SHORT);
-
-        toast.show();
-
     }
+
     // If the authorization flow is required, handle the user's response:
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
@@ -79,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
 
-
         Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
                 .readData(readRequest)
                 .addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
@@ -101,4 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }
+
+
