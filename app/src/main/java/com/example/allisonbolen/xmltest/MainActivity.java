@@ -29,13 +29,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // ask user for the permissions to their google fit account
+        permisions();
+
+        // read steps using daily set call
+        GFApi steps = new GFApi(this);
+        steps.readData();
+        TextView labelVeiw = findViewById(R.id.Label);
+        labelVeiw.setText("THIS IS THE STEPS FOR TODAY: " + steps.getTotalSteps());
+
+        // read calories
+
+        // read calories per single user input date
+
+        // read calories for single user input date
+
+        // read hydration
+
+        // write hydration
 
 
 
+    }
+
+    public void permisions(){
         FitnessOptions fitnessOptions =
                 FitnessOptions.builder()
                         .addDataType(DataType.TYPE_STEP_COUNT_CUMULATIVE)
                         .addDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                        .addDataType(DataType.TYPE_CALORIES_EXPENDED)
                         .build();
         if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
             GoogleSignIn.requestPermissions(
@@ -46,11 +68,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             subscribe();
         }
-
-        readData();
-
     }
-
 
     /** Records step data by requesting a subscription to background step data. */
     public void subscribe() {
@@ -67,36 +85,6 @@ public class MainActivity extends AppCompatActivity {
                                 } else {
                                     Log.w("NO", "There was a problem subscribing.", task.getException());
                                 }
-                            }
-                        });
-    }
-
-    /**
-     * Reads the current daily step total, computed from midnight of the current day on the device's
-     * current timezone.
-     */
-    private void readData() {
-
-        Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
-                .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
-                .addOnSuccessListener(
-                        new OnSuccessListener<DataSet>() {
-                            @Override
-                            public void onSuccess(DataSet dataSet) {
-                                long total =
-                                        dataSet.isEmpty()
-                                                ? 0
-                                                : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
-                                TextView labelView = findViewById(R.id.Label);
-                                labelView.setText("Total steps: " + total);
-                                Log.i("TOTAL STEPS", "Total steps: " + total);
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("BAD NO GOOD", "There was a problem getting the step count.", e);
                             }
                         });
     }
